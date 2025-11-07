@@ -1,0 +1,41 @@
+name: Deploy Policy
+
+on:
+  issue_comment:
+    types:
+      - created
+
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+    if: ${{ github.event.issue.pull_request }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build
+        run: echo "deployTier=dev" >> "$GITHUB_OUTPUT"
+    outputs:
+      deployTier: ${{ steps.Build.outputs.deployTier }}
+
+  admin-approval:
+    needs: diff
+    runs-on: ubuntu-latest
+    environment:
+      name: admin
+    steps:
+      - name: Admin Approval
+        run: |
+          echo "The deployment has been approved by admin"
+          echo "Deploying to ${{ needs.diff.outputs.deployTier }}"
+
+  deployment:
+    needs:
+      - diff
+      - admin-approval
+    runs-on: ubuntu-latest
+    environment:
+      name: deployer
+    steps:
+      - name: Deployment Trigger
+        run: |
+          echo "The deployment has been initiated"
+          echo "Deploying to ${{ needs.diff.outputs.deployTier }}"
