@@ -1,69 +1,69 @@
-name: deploy-then-decide
+# name: deploy-then-decide
 
-on:
-  push:
-    branches: [ main ]
+# on:
+#   push:
+#     branches: [ main ]
 
-permissions:
-  contents: read
-  actions: write   # needed if you later want to cancel runs, etc.
-  deployments: write
+# permissions:
+#   contents: read
+#   actions: write   # needed if you later want to cancel runs, etc.
+#   deployments: write
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: Build
-        run: |
-          echo "build your app"
-      - name: Deploy
-        run: |
-          echo "deploy your app"
+# jobs:
+#   deploy:
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#       - name: Build
+#         run: |
+#           echo "build your app"
+#       - name: Deploy
+#         run: |
+#           echo "deploy your app"
 
-  # Manual choice gate AFTER deployment
-  gate:
-    needs: [deploy]
-    runs-on: ubuntu-latest
-    outputs:
-      decision: ${{ steps.decision.outputs.approval }}
-    steps:
-      # This action lets an approver pick one of allowed values.
-      - name: Await approval and choose action
-        id: decision
-        uses: trstringer/manual-approval@v1
-        with:
-          secret: ${{ secrets.GITHUB_TOKEN }}
-          approvers: alice,bob,carol           # who can approve
-          minimum-approvals: 1
-          issue-title: "Post-deploy decision needed"
-          allow-reject: true
-          additional-approved-words: "merge,rollback"
-          allowed-values: "merge,rollback"     # 👈 The choices
-          timeout-minutes: 1440                # 24h
+#   # Manual choice gate AFTER deployment
+#   gate:
+#     needs: [deploy]
+#     runs-on: ubuntu-latest
+#     outputs:
+#       decision: ${{ steps.decision.outputs.approval }}
+#     steps:
+#       # This action lets an approver pick one of allowed values.
+#       - name: Await approval and choose action
+#         id: decision
+#         uses: trstringer/manual-approval@v1
+#         with:
+#           secret: ${{ secrets.GITHUB_TOKEN }}
+#           approvers: alice,bob,carol           # who can approve
+#           minimum-approvals: 1
+#           issue-title: "Post-deploy decision needed"
+#           allow-reject: true
+#           additional-approved-words: "merge,rollback"
+#           allowed-values: "merge,rollback"     # 👈 The choices
+#           timeout-minutes: 1440                # 24h
 
-  merge:
-    needs: [gate]
-    if: ${{ needs.gate.outputs.decision == 'merge' }}
-    runs-on: ubuntu-latest
-    environment: prod-merge   # optional: require an environment approval too
-    steps:
-      - uses: actions/checkout@v4
-      - name: Merge to protected branch / finalize release
-        run: |
-          echo "do the merge/promote tasks"
-      - name: Done
-        run: echo "Merge path complete."
+#   merge:
+#     needs: [gate]
+#     if: ${{ needs.gate.outputs.decision == 'merge' }}
+#     runs-on: ubuntu-latest
+#     environment: prod-merge   # optional: require an environment approval too
+#     steps:
+#       - uses: actions/checkout@v4
+#       - name: Merge to protected branch / finalize release
+#         run: |
+#           echo "do the merge/promote tasks"
+#       - name: Done
+#         run: echo "Merge path complete."
 
-  rollback:
-    needs: [gate]
-    if: ${{ needs.gate.outputs.decision == 'rollback' }}
-    runs-on: ubuntu-latest
-    environment: prod-rollback   # optional: separate approvers
-    steps:
-      - uses: actions/checkout@v4
-      - name: Roll back deployment
-        run: |
-          echo "execute rollback"
-      - name: Done
-        run: echo "Rollback path complete."
+#   rollback:
+#     needs: [gate]
+#     if: ${{ needs.gate.outputs.decision == 'rollback' }}
+#     runs-on: ubuntu-latest
+#     environment: prod-rollback   # optional: separate approvers
+#     steps:
+#       - uses: actions/checkout@v4
+#       - name: Roll back deployment
+#         run: |
+#           echo "execute rollback"
+#       - name: Done
+#         run: echo "Rollback path complete."

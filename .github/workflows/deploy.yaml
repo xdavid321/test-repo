@@ -29,7 +29,6 @@ jobs:
 
   deployment:
     needs:
-      - diff
       - admin-approval
     runs-on: ubuntu-latest
     environment:
@@ -39,3 +38,25 @@ jobs:
         run: |
           echo "The deployment has been initiated"
           echo "Deploying to ${{ needs.diff.outputs.deployTier }}"
+
+  merge:
+    needs:
+      - deployment
+    runs-on: ubuntu-latest
+    environment:
+      name: deployer
+    steps:
+      - name: Merge PR with master
+        run: |
+          echo "PR merged with master"
+
+  rollback:
+    needs:
+      - deployment
+    runs-on: ubuntu-latest
+    environment:
+      name: deployer
+    steps:
+      - name: Rollback changes
+        run: |
+          echo "Changes rolled back"
