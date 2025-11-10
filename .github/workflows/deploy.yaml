@@ -54,7 +54,7 @@ jobs:
   rollback:
     needs:
       - merge
-    if: ${{ needs.merge.result == 'cancelled' || needs.merge.result == 'failure' }}
+    if: ${{ always() && (needs.merge.result == 'cancelled' || needs.merge.result == 'failure') }}
     runs-on: ubuntu-latest
     environment:
       name: deployer
