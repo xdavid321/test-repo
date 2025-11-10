@@ -43,7 +43,7 @@ jobs:
     needs:
       - deployment
     if: ${{ github.event.issue.pull_request }}
-    runs-on: pr-merge-approvers
+    runs-on: ubuntu-latest
     environment:
       name: deployer
     steps:
@@ -53,11 +53,11 @@ jobs:
 
   rollback:
     needs:
-      - deployment
-    if: ${{ github.event.issue.pull_request }}
+      - merge
+    if: ${{ needs.merge.result == 'cancelled' || needs.merge.result == 'failure' }}
     runs-on: ubuntu-latest
     environment:
-      name: rollback-approvers
+      name: deployer
     steps:
       - name: Rollback changes
         run: |
