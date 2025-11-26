@@ -11,6 +11,7 @@ jobs:
     steps:
       - run: |
           # pip install PyGithub
+          pwd
           python .github/scripts/get_event.py
   diff:
     runs-on: ubuntu-latest
