@@ -6,6 +6,12 @@ on:
       - created
 
 jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          # pip install PyGithub
+          python .github/scripts/get_event.py
   diff:
     runs-on: ubuntu-latest
     if: ${{ github.event.issue.pull_request }}
